@@ -8,25 +8,44 @@
 #ifndef ALGORITHM_ITERATOR_ABSTRACT_ITERATOR_H
 #define ALGORITHM_ITERATOR_ABSTRACT_ITERATOR_H
 
-#include <concepts>
+#include <iterator/iterator_type.h>
 
 namespace algorithm::iterator {
 
-	template<class Iter>
-	concept AbstractIterConcept = requires(
-        Iter iter) {
+	namespace detail {
+		template<class Impl>
+		concept AbstractIterImplConcept =  requires(
+		        Impl impl,
+		        ssize_t step) {
+			{ impl.equal(impl) } -> std::same_as<bool>;
+		};
+	}
 
-		typename Iter::ValueType;
+	template <class Impl, class Value>
+	class IteratorCRTP<Impl, Value, IteratorType::Abstract> {
+	public:
+		using ValueType        = Value;
+		using ReferenceType    = ValueType&;
+		using PointerType      = ValueType*;
+		using DifferenceType   = ssize_t;
 
-		typename Iter::ReferenceType;
+		static constexpr IteratorType IteratorCategory = IteratorType::Abstract;
 
-        typename Iter::PointerType;
-        
-        { *iter } -> std::same_as<typename Iter::ReferenceType>;
+	public:
+		friend bool operator==(const Impl& lhs, const Impl& rhs) { return equal(lhs, rhs); }
 
-        { iter.operator->() } -> std::same_as<typename Iter::PointerType>;
+		friend bool operator!=(const Impl& lhs, const Impl& rhs) { return !equal(lhs, rhs); }
 
-		{ iter == iter } -> std::same_as<bool>;
+		Value & operator*() const { return as_derived_const().dereference(); }
+
+		Value * operator->() const { return std::addressof(operator*()); }
+
+	private:
+		Impl &as_derived() { return static_cast<Impl &>(*this); }
+
+		const Impl&as_derived_const() const { return static_cast<const Impl&>(*this); }
+
+		static bool equal(const Impl& lhs, const Impl& rhs) { return lhs.equal(rhs); }
 	};
 
 }

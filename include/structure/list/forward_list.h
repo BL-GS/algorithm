@@ -21,61 +21,46 @@ namespace algorithm::structure {
 
     inline namespace forward_list {
 
-		template<class Value>
-		struct ListNode {
-		public:
-			Value value_;
-			ListNode *next_ptr_;
+		namespace detail {
+			template<class Value>
+			struct ListNode {
+			public:
+				Value value_;
+				ListNode *next_ptr_;
 
-		public:
-			ListNode() : next_ptr_(nullptr) {}
-			ListNode(const Value &value) : value_(value), next_ptr_(nullptr) {}
-			ListNode(Value &&value) : value_(std::forward<Value>(value)), next_ptr_(nullptr) {}
-		};
+			public:
+				ListNode() : next_ptr_(nullptr) {}
+				ListNode(const Value &value) : value_(value), next_ptr_(nullptr) {}
+				ListNode(Value &&value) : value_(std::forward<Value>(value)), next_ptr_(nullptr) {}
+			};
 
-		template<class Value>
-		struct Iterator {
-		public:
-			using ValueType     = std::remove_reference_t<Value>;
-			using ReferenceType = ValueType &;
-			using PointerType   = ValueType *;
+			template<class Value>
+			struct Iterator: iterator::ForwardingIteratorCRTP<Iterator<Value>, Value> {
+			public:
+				using ValueType     = std::remove_reference_t<Value>;
+				using ReferenceType = ValueType &;
+				using PointerType   = ValueType *;
 
-			using NodeType      = ListNode<ValueType>;
-			
-		public:
-			NodeType *ptr_;
+				using NodeType      = ListNode<ValueType>;
 
-		public:
-			Iterator(): ptr_(nullptr) {}
+			public:
+				NodeType *ptr_;
 
-			Iterator(const Iterator &other): ptr_(other.ptr_) {}
+			public:
+				Iterator() = default;
 
-			Iterator(NodeType *ptr): ptr_(ptr) {}
+				Iterator(NodeType *ptr): ptr_(ptr) {}
 
-		public:
-			Iterator &operator++() {
-				ptr_ = ptr_->next_ptr_;
-				return *this;
-			}
+			public:
+				ReferenceType dereference() const { return ptr_->value_; }
 
-			Iterator operator++(int) {
-				Iterator res = *this;
-				ptr_ = ptr_->next_ptr_;
-				return res;
-			}
+			public:
+				void increment() { ptr_ = ptr_->next_ptr_; }
 
-			bool operator==(const Iterator &other) const {
-				return ptr_ == other.ptr_;
-			}
-
-			Value &operator*() {
-				return ptr_->value_;
-			}
-
-			Value *operator->() {
-				return &(ptr_->value_);
-			}
-		};
+			public:
+				bool equal(const Iterator &other) const { return ptr_ == other.ptr_; }
+			};
+		}
 
 		template<class Value, class Allocator = allocator::ReserveAllocator<Value>>
 		    requires allocator::AllocatorConcept<Allocator>
@@ -87,18 +72,15 @@ namespace algorithm::structure {
             using ReferenceType = ValueType &;
             using PointerType   = ValueType *;
 
-		private:
-			using NodeType = ListNode<ValueType>;
+		public:
+			using NodeType = detail::ListNode<ValueType>;
 
 		public:
 			using AllocatorType = Allocator::template Rebind<NodeType>::type;
 
         public:
-			using IteratorType             = Iterator<ValueType>;
-			using ConstIteratorType        = Iterator<const ValueType>;
-
-			static_assert(iterator::ForwardingIterConcept<IteratorType>);
-			static_assert(iterator::ForwardingIterConcept<ConstIteratorType>);
+			using IteratorType             = detail::Iterator<ValueType>;
+			using ConstIteratorType        = detail::Iterator<const ValueType>;
 
 		private:
 			NodeType head_node_;

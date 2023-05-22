@@ -33,21 +33,16 @@ void push_back(benchmark::State &state) {
 	}
 }
 
-BENCHMARK_TEMPLATE(construct, algorithm::structure::SmallVector<size_t, 100, algorithm::allocator::BaseAllocator>)
-        ->RangeMultiplier(10)->Range(10, 10000)
-        ->Iterations(10);
+BENCHMARK_TEMPLATE(construct, algorithm::structure::SmallVector<size_t, 100>)
+        ->RangeMultiplier(10)->Range(10, 10000);
 BENCHMARK_TEMPLATE(construct, std::vector<size_t>)
-        ->RangeMultiplier(10)->Range(10, 10000)
-        ->Iterations(10);
+        ->RangeMultiplier(10)->Range(10, 10000);
 BENCHMARK_TEMPLATE(construct, std::array<size_t, 10000>)
-        ->RangeMultiplier(10)->Range(10, 10000)
-        ->Iterations(10);
+        ->RangeMultiplier(10)->Range(10, 10000);
 
-BENCHMARK_TEMPLATE(push_back, algorithm::structure::SmallVector<size_t, 100, algorithm::allocator::BaseAllocator>)
-        ->RangeMultiplier(10)->Range(10, 1000)
-        ->Iterations(10);
+BENCHMARK_TEMPLATE(push_back, algorithm::structure::SmallVector<size_t, 100>)
+        ->RangeMultiplier(10)->Range(10, 1000);
 BENCHMARK_TEMPLATE(push_back, std::vector<size_t>)
-        ->RangeMultiplier(10)->Range(10, 1000)
-        ->Iterations(10);
+        ->RangeMultiplier(10)->Range(10, 1000);
 
 BENCHMARK_MAIN();

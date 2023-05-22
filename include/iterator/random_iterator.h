@@ -7,34 +7,98 @@
 #ifndef ALGORITHM_ITERATOR_RANDOM_ITERATOR_H
 #define ALGORITHM_ITERATOR_RANDOM_ITERATOR_H
 
-#include <compare>
-#include <concepts>
-#include <iterator/bilateral_iterator.h>
+#include <iterator/iterator_type.h>
 
 namespace algorithm::iterator {
 
-	template<class RandomIter>
-	concept RandomIterConcept = requires(RandomIter iter) {
-		requires BilateralIterConcept<RandomIter>;
+	namespace detail {
+		template<class Impl>
+		concept RandomIterImplConcept =  requires(
+		        Impl impl,
+		        ssize_t step) {
 
-		{ iter + 2 } -> std::same_as<RandomIter>;
+			{ impl.increment() };
+			{ impl.increment(step) };
 
-		{ iter - 2 } -> std::same_as<RandomIter>;
+			{ impl.decrement() };
+			{ impl.decrement(step) };
 
-		{ iter += 2 } -> std::same_as<void>;
+			{ impl.equal(impl) } -> std::same_as<bool>;
+		    { impl.compare(impl) };
+		};
+	}
 
-		{ iter -= 2 } -> std::same_as<void>;
+	template <class Impl, class Value>
+	class IteratorCRTP<Impl, Value, IteratorType::Random> {
+	public:
+		using ValueType        = Value;
+		using ReferenceType    = ValueType&;
+		using PointerType      = ValueType*;
+		using DifferenceType   = ssize_t;
 
-		{ iter - iter } -> std::same_as<std::size_t>;
+		static constexpr IteratorType IteratorCategory = IteratorType::Random;
 
-		{ iter <= iter } -> std::same_as<bool>;
+	public:
+		friend bool operator==(const Impl& lhs, const Impl& rhs) { return equal(lhs, rhs); }
 
-		{ iter >= iter } -> std::same_as<bool>;
+		friend bool operator!=(const Impl& lhs, const Impl& rhs) { return !equal(lhs, rhs); }
 
-		{ iter <  iter } -> std::same_as<bool>;
+		Value & operator*() const { return as_derived_const().dereference(); }
 
-		{ iter >  iter } -> std::same_as<bool>;
+		Value * operator->() const { return std::addressof(operator*()); }
+
+		Impl & operator++() {
+			as_derived().increment();
+			return as_derived();
+		}
+
+		Impl operator++(int) {
+			auto ret = as_derived(); // copy
+			as_derived().increment();
+			return ret;
+		}
+
+		Impl & operator--() {
+			as_derived().decrement();
+			return as_derived();
+		}
+
+		Impl operator--(int) {
+			auto ret = as_derived(); // copy
+			as_derived().decrement();
+			return ret;
+		}
+
+		void operator+=(DifferenceType diff) {
+			as_derived().increment(diff);
+		}
+
+		Impl operator +(DifferenceType diff) {
+			auto ret = as_derived(); // copy
+			as_derived().increment(diff);
+			return ret;
+		}
+
+		void operator-=(DifferenceType diff) {
+			as_derived().decrement(diff);
+		}
+
+		Impl operator- (DifferenceType diff) {
+			auto ret = as_derived(); // copy
+			as_derived().decrement(diff);
+			return ret;
+		}
+
+	private:
+		Impl & as_derived() { return static_cast<Impl &>(*this); }
+
+		const Impl&as_derived_const() const { return static_cast<const Impl&>(*this); }
+
+		static bool equal(const Impl& lhs, const Impl& rhs) { return lhs.equal(rhs); }
+
+		static auto compare(const Impl &lhs, const Impl &rhs) { return lhs.compare(rhs); }
 	};
+
 }
 
 #endif//ALGORITHM_ITERATOR_RANDOM_ITERATOR_H

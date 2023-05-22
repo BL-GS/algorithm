@@ -27,6 +27,8 @@ namespace algorithm::allocator {
 
 		static constexpr size_t ALLOC_PAGE_SIZE   = 1024;
 
+		static constexpr bool   INIT_ALLOC        = true;
+
 	private:
 		struct Chunk {
 			Chunk *next_chunk_;
@@ -43,11 +45,17 @@ namespace algorithm::allocator {
 		ChunkInfo chunk_list[CHUNK_TYPE_AMOUNT];
 
 	public:
-		ReserveAllocatorPool() = default;
+		ReserveAllocatorPool() {
+			if constexpr (INIT_ALLOC) {
+				for (size_t i = ALIGN_SIZE; i < max_size(); i <<= 1) {
+					deallocate(allocate(i), i);
+				}
+			}
+		}
 
 		ReserveAllocatorPool(const ReserveAllocatorPool &other) = delete;
 
-		ReserveAllocatorPool(ReserveAllocatorPool &&other) {
+		ReserveAllocatorPool(ReserveAllocatorPool &&other)  noexcept {
 			std::memcpy(chunk_list, other.chunk_list, sizeof(void *) * CHUNK_TYPE_AMOUNT);
 			std::fill(other.chunk_list, other.chunk_list + CHUNK_TYPE_AMOUNT, ChunkInfo{});
 		}
@@ -122,9 +130,6 @@ namespace algorithm::allocator {
 				return new_chunk_ptr;
 			}
 
-			int old_chunk_idx = get_chunk_idx(old_size);
-			int new_chunk_idx = get_chunk_idx(new_size);
-
 			if (old_size == new_size) { return ptr; }
 
 			void *new_chunk_ptr = allocate(new_size);
@@ -173,7 +178,6 @@ namespace algorithm::allocator {
 	};
 
 	inline static thread_local ReserveAllocatorPool thread_allocator_pool;
-
 }
 
 #endif//ALGORITHM_ALLOCATOR_THREAD_ALLOCAOTR_H

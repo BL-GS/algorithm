@@ -1,9 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
 
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS_RELEASE} -Wall -O3 -flto")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS_RELEASE} -march=native -mfma -msse4.2 -mrtm -mcx16 -mbmi2 -mlzcnt")
-
 # ------------- Project -----------------
 #--------------
 

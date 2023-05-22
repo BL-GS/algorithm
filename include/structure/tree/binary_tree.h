@@ -19,133 +19,82 @@ namespace algorithm::structure {
 
 	inline namespace binary_tree {
 
-		template<class Value>
-		struct TreeNode {
-		public:
-			using ValueType = Value;
+		namespace detail {
 
-		public:
-			ValueType value_;
-			TreeNode *left_child_;
-			TreeNode *right_child_;
+			template<class Value>
+			struct TreeNode {
+			public:
+				using ValueType = Value;
 
-		public:
-			TreeNode() = default;
+			public:
+				ValueType value_;
+				TreeNode *left_child_;
+				TreeNode *right_child_;
 
-			TreeNode(const ValueType &value): value_(value), left_child_(nullptr), right_child_(nullptr) {}
+			public:
+				TreeNode() = default;
+				TreeNode(const ValueType &value): value_(value), left_child_(nullptr), right_child_(nullptr) {}
+				TreeNode(ValueType &&value): value_(std::forward<ValueType>(value)), left_child_(nullptr), right_child_(nullptr) {}
+			};
 
-			TreeNode(ValueType &&value): value_(std::forward<ValueType>(value)), left_child_(nullptr), right_child_(nullptr) {}
-		};
+			template<class Value>
+			struct Iterator: iterator::BilateralIteratorCRTP<Iterator<Value>, Value> {
+			public:
+				using ValueType     = std::remove_reference_t<Value>;
+				using ReferenceType = ValueType &;
+				using PointerType   = ValueType *;
 
-		template<class Value>
-		struct Iterator {
-		public:
-			using ValueType     = std::remove_reference_t<Value>;
-			using ReferenceType = ValueType &;
-			using PointerType   = ValueType *;
+				using NodeType      = TreeNode<ValueType>;
 
-			using NodeType      = TreeNode<ValueType>;
+			private:
+				NodeType *ptr_;
 
-		public:
-			NodeType *ptr_;
+			public:
+				Iterator() = default;
 
-		public:
-			Iterator(): ptr_(nullptr) {}
+				Iterator(NodeType *ptr): ptr_(ptr) {}
 
-			Iterator(const Iterator &other): ptr_(other.ptr_) {}
+			public:
+				ReferenceType dereference() const { return ptr_->value_; }
 
-			Iterator(NodeType *ptr): ptr_(ptr) {}
+			public:
+				void increment() { ptr_ = ptr_->right_child_; }
 
-		public:
-			Iterator &operator++() {
-				ptr_ = ptr_->right_child_;
-				return *this;
-			}
+				void decrement() { ptr_ = ptr_->left_child_; }
 
-			Iterator &operator--() {
-				ptr_ = ptr_->left_child_;
-				return *this;
-			}
+			public:
+				bool equal(const Iterator &other) const { return ptr_ == other.ptr_; }
+			};
 
-			Iterator operator++(int) {
-				Iterator res = *this;
-				ptr_ = ptr_->right_child_;
-				return res;
-			}
+			template<class Value>
+			struct ReverseIterator: iterator::BilateralIteratorCRTP<ReverseIterator<Value>, Value> {
+			public:
+				using ValueType     = std::remove_reference_t<Value>;
+				using ReferenceType = ValueType &;
+				using PointerType   = ValueType *;
 
-			Iterator operator--(int) {
-				Iterator res = *this;
-				ptr_ = ptr_->left_child_;
-				return res;
-			}
+				using NodeType      = TreeNode<ValueType>;
 
-			bool operator==(const Iterator &other) const {
-				return ptr_ == other.ptr_;
-			}
+			private:
+				NodeType *ptr_;
 
-			ValueType &operator*() {
-				return ptr_->value_;
-			}
+			public:
+				ReverseIterator() = default;
 
-			ValueType *operator->() {
-				return &(ptr_->value_);
-			}
-		};
+				ReverseIterator(NodeType *ptr): ptr_(ptr) {}
 
-		template<class Value>
-		struct ReverseIterator {
-		public:
-			using ValueType     = std::remove_reference_t<Value>;
-			using ReferenceType = ValueType &;
-			using PointerType   = ValueType *;
+			public:
+				ReferenceType dereference() const { return ptr_->value_; }
 
-			using NodeType = TreeNode<ValueType>;
+			public:
+				void increment() { ptr_ = ptr_->left_child_; }
 
-		public:
-			NodeType *ptr_;
+				void decrement() { ptr_ = ptr_->right_child_; }
 
-		public:
-			ReverseIterator() : ptr_(nullptr) {}
-
-			ReverseIterator(const ReverseIterator &other) : ptr_(other.ptr_) {}
-
-			ReverseIterator(NodeType *ptr) : ptr_(ptr) {}
-
-		public:
-			ReverseIterator &operator++() {
-				ptr_ = ptr_->prev_ptr_;
-				return *this;
-			}
-
-			ReverseIterator &operator--() {
-				ptr_ = ptr_->next_ptr_;
-				return *this;
-			}
-
-			ReverseIterator operator++(int) {
-				Iterator res = *this;
-				ptr_ = ptr_->prev_ptr_;
-				return res;
-			}
-
-			ReverseIterator operator--(int) {
-				Iterator res = *this;
-				ptr_ = ptr_->next_ptr_;
-				return res;
-			}
-
-			bool operator==(const ReverseIterator &other) const {
-				return ptr_ == other.ptr_;
-			}
-
-			Value &operator*() {
-				return ptr_->value_;
-			}
-
-			Value *operator->() {
-				return &(ptr_->value_);
-			}
-		};
+			public:
+				bool equal(const ReverseIterator &other) { return ptr_ == other.ptr_; }
+			};
+		}
 
 		template<class Value, class Allocator>
 		class SimpleBinaryTree {
@@ -157,21 +106,16 @@ namespace algorithm::structure {
 			using PointerType   = ValueType *;
 
 		private:
-			using NodeType      = TreeNode<ValueType>;
+			using NodeType      = detail::TreeNode<ValueType>;
 
 		public:
 			using AllocatorType = Allocator::template Rebind<NodeType>::type;
 
 		private:
-			using IteratorType             = Iterator<ValueType>;
-			using ConstIteratorType        = Iterator<const ValueType>;
-			using ReverseIteratorType      = ReverseIterator<ValueType>;
-			using ReverseConstIteratorType = ReverseIterator<const ValueType>;
-
-			static_assert(iterator::BilateralIterConcept<IteratorType>);
-			static_assert(iterator::BilateralIterConcept<ConstIteratorType>);
-			static_assert(iterator::BilateralIterConcept<ReverseIteratorType>);
-			static_assert(iterator::BilateralIterConcept<ReverseConstIteratorType>);
+			using IteratorType             = detail::Iterator<ValueType>;
+			using ConstIteratorType        = detail::Iterator<const ValueType>;
+			using ReverseIteratorType      = detail::ReverseIterator<ValueType>;
+			using ReverseConstIteratorType = detail::ReverseIterator<const ValueType>;
 
 			static constexpr NodeType *VACANCY_TAIL_NODE_PTR_ = nullptr;
 

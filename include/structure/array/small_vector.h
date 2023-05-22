@@ -17,156 +17,66 @@ namespace algorithm::structure {
 
 	inline namespace small_vector {
 
-		template<class Value>
-		struct Iterator {
-		public:
-			using ValueType     = std::remove_reference_t<Value>;
-			using ReferenceType = ValueType &;
-			using PointerType   = ValueType *;
+		namespace detail {
 
-		public:
-			ValueType *ptr_;
+			template<class Value>
+			struct Iterator: iterator::RandomIteratorCRTP<Iterator<Value>, Value> {
+			public:
+				using ValueType     = std::remove_reference_t<Value>;
+				using ReferenceType = ValueType &;
+				using PointerType   = ValueType *;
 
-		public:
-			Iterator(): ptr_(nullptr) {}
+			public:
+				ValueType *ptr_;
 
-			Iterator(const Iterator &other): ptr_(other.ptr_) {}
+			public:
+				Iterator() = default;
 
-			Iterator(ValueType *ptr): ptr_(ptr) {}
+				Iterator(ValueType *ptr): ptr_(ptr) {}
 
-		public:
-			Iterator &operator++() {
-				++ptr_;
-				return *this;
-			}
+			public:
+				ReferenceType dereference() const { return *ptr_; }
 
-			Iterator &operator--() {
-				--ptr_;
-				return *this;
-			}
+			public:
+				void increment(ssize_t step = 1) { ptr_ += step; }
 
-			Iterator operator++(int) {
-				return Iterator(ptr_++);
-			}
+				void decrement(ssize_t step = 1) { ptr_ -= step; }
 
-			Iterator operator--(int) {
-				return Iterator(ptr_--);
-			}
+			public:
+				bool equal(const Iterator &other) const { return ptr_ == other.ptr_; }
 
-			Iterator &operator+=(size_t step) {
-				ptr_ += step;
-				return *this;
-			}
+				auto compare(const Iterator &other) const { return ptr_ <=> other.ptr_; }
+			};
 
-			Iterator &operator-=(size_t step) {
-				ptr_ -= step;
-				return *this;
-			}
+			template<class Value>
+			struct ReverseIterator: iterator::RandomIteratorCRTP<ReverseIterator<Value>, Value> {
+			public:
+				using ValueType     = std::remove_reference_t<Value>;
+				using ReferenceType = ValueType &;
+				using PointerType   = ValueType *;
 
-			Iterator operator+ (size_t step) const {
-				return Iterator(ptr_ + step);
-			}
+			public:
+				ValueType *ptr_;
 
-			Iterator operator- (size_t step) const {
-				return Iterator(ptr_ - step);
-			}
+			public:
+				ReferenceType dereference() const { return *ptr_; }
 
-			size_t operator- (const Iterator &other) const {
-				return other.ptr_ - ptr_;
-			}
+			public:
+				ReverseIterator() = default;
 
-			bool operator==(const Iterator &other) const {
-				return ptr_ == other.ptr_;
-			}
+				ReverseIterator(ValueType *ptr): ptr_(ptr) {}
 
-			auto operator<=> (const Iterator &other) const {
-		        return ptr_ <=> other.ptr_;
-			}
+			public:
+				void increment(ssize_t step = 1) { ptr_ -= step; }
 
-			ValueType &operator*() {
-				return *ptr_;
-			}
+				void decrement(ssize_t step = 1) { ptr_ += step; }
 
-			ValueType *operator->() {
-				return ptr_;
-			}
-		};
+			public:
+				bool equal(const ReverseIterator &other) const { return ptr_ == other.ptr_; }
 
-		template<class Value>
-		struct ReverseIterator {
-		public:
-			using ValueType     = std::remove_reference_t<Value>;
-			using ReferenceType = ValueType &;
-			using PointerType   = ValueType *;
-
-		public:
-			ValueType *ptr_;
-
-		public:
-			ReverseIterator() : ptr_(nullptr) {}
-
-			ReverseIterator(const ReverseIterator &other) : ptr_(other.ptr_) {}
-
-			ReverseIterator(ValueType *ptr) : ptr_(ptr) {}
-
-		public:
-			ReverseIterator &operator++() {
-				--ptr_;
-				return *this;
-			}
-
-			ReverseIterator &operator--() {
-				++ptr_;
-				return *this;
-			}
-
-			ReverseIterator operator++(int) const {
-				return ReverseIterator(ptr_--);
-			}
-
-			ReverseIterator operator--(int) const {
-				return ReverseIterator(ptr_++);
-			}
-
-			ReverseIterator &operator+=(size_t step) {
-				ptr_ -= step;
-				return *this;
-			}
-
-			ReverseIterator &operator-=(size_t step) {
-				ptr_ += step;
-				return *this;
-			}
-
-			ReverseIterator operator+ (size_t step) const {
-				return Iterator(ptr_ - step);
-			}
-
-			ReverseIterator operator- (size_t step) const {
-				return Iterator(ptr_ + step);
-			}
-
-			size_t operator- (const ReverseIterator &other) const {
-				return ptr_ - other.ptr_;
-			}
-
-			bool operator==(const ReverseIterator &other) const {
-				return ptr_ == other.ptr_;
-			}
-
-			auto operator<=> (const ReverseIterator &other) const {
-				return other.ptr_ <=> ptr_;
-			}
-
-			ValueType &operator*() {
-				return *ptr_;
-			}
-
-			ValueType *operator->() {
-				return ptr_;
-			}
-		};
-
+				auto compare(const ReverseIterator &other) const { return other.ptr_ <=> ptr_; }
+			};
+		}
 
 		template<class Value, size_t FIXED_SIZE = 2, class Allocator = allocator::ReserveAllocator<Value>>
 		class SmallVector {
@@ -182,15 +92,10 @@ namespace algorithm::structure {
 			static constexpr size_t FIXED_CAPACITY_SIZE = sizeof(ValueType) * FIXED_SIZE;
 
 		public:
-			using IteratorType             = Iterator<ValueType>;
-			using ConstIteratorType        = Iterator<const ValueType>;
-			using ReverseIteratorType      = ReverseIterator<ValueType>;
-			using ReverseConstIteratorType = ReverseIterator<const ValueType>;
-
-			static_assert(iterator::RandomIterConcept<IteratorType>);
-			static_assert(iterator::RandomIterConcept<ConstIteratorType>);
-			static_assert(iterator::RandomIterConcept<ReverseIteratorType>);
-			static_assert(iterator::RandomIterConcept<ReverseConstIteratorType>);
+			using IteratorType             = detail::Iterator<ValueType>;
+			using ConstIteratorType        = detail::ReverseIterator<const ValueType>;
+			using ReverseIteratorType      = detail::Iterator<ValueType>;
+			using ReverseConstIteratorType = detail::ReverseIterator<const ValueType>;
 
 		private:
 			size_t size_;
@@ -427,10 +332,10 @@ namespace algorithm::structure {
 			static constexpr size_t FIXED_CAPACITY_SIZE = sizeof(ValueType) * FIXED_SIZE;
 
 		public:
-			using IteratorType             = Iterator<ValueType>;
-			using ConstIteratorType        = Iterator<const ValueType>;
-			using ReverseIteratorType      = ReverseIterator<ValueType>;
-			using ReverseConstIteratorType = ReverseIterator<const ValueType>;
+			using IteratorType             = detail::Iterator<ValueType>;
+			using ConstIteratorType        = detail::Iterator<const ValueType>;
+			using ReverseIteratorType      = detail::ReverseIterator<ValueType>;
+			using ReverseConstIteratorType = detail::ReverseIterator<const ValueType>;
 
 		private:
 			size_t size_;

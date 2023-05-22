@@ -19,138 +19,66 @@ namespace algorithm::structure {
 
     inline namespace array {
 
-        template<class Value>
-		struct Iterator {
-        public:
-			using ValueType     = std::remove_reference_t<Value>;
-			using ReferenceType = ValueType &;
-			using PointerType   = ValueType *;
+		namespace detail {
 
-        private:
-			ValueType *ptr_;
+			template<class Value>
+			struct Iterator: iterator::RandomIteratorCRTP<Iterator<Value>, Value> {
+			public:
+				using ValueType     = std::remove_reference_t<Value>;
+				using ReferenceType = ValueType &;
+				using PointerType   = ValueType *;
 
-		public:
-			Iterator &operator++() {
-				ptr_++;
-				return *this;
-			}
+			private:
+				ValueType *ptr_;
 
-			Iterator &operator--() {
-				ptr_--;
-				return *this;
-			}
+			public:
+				Iterator() = default;
 
-			Iterator operator++(int) {
-				Iterator res = *this;
-				ptr_++;
-				return res;
-			}
+				Iterator(ValueType *ptr): ptr_(ptr) {}
 
-			Iterator operator--(int) {
-				Iterator res = *this;
-				ptr_--;
-				return res;
-			}
+			public:
+				ReferenceType dereference() const { return *ptr_; }
 
-			Iterator operator+(size_t idx) const {
-				return {.ptr_ = ptr_ + idx};
-			}
+			public:
+				void increment(ssize_t step = 1) { ptr_ += step; }
 
-			Iterator operator-(size_t idx) const {
-				return {.ptr_ = ptr_ - idx};
-			}
+				void decrement(ssize_t step = 1) { ptr_ -= step; }
 
-			void operator+=(size_t idx) {
-				ptr_ += idx;
-			}
+			public:
+				bool equal(const Iterator &other) const { return ptr_ == other.ptr_; }
 
-			void operator-=(size_t idx) {
-				ptr_ -= idx;
-			}
+				auto compare(const Iterator &other) const { return ptr_ <=> other.ptr_; }
+			};
 
-			size_t operator- (const Iterator &other) const {
-				return other.ptr_ - ptr_;
-			}
+			template<class Value>
+			struct ReverseIterator: iterator::RandomIteratorCRTP<Iterator<Value>, Value> {
+			public:
+				using ValueType     = std::remove_reference_t<Value>;
+				using ReferenceType = ValueType &;
+				using PointerType   = ValueType *;
 
-			auto operator<=>(const Iterator &other) const {
-				return ptr_ <=> other.ptr_;
-			}
+			private:
+				ValueType *ptr_;
 
-			bool operator==(const Iterator &other) const {
-				return ptr_ == other.ptr_;
-			}
+			public:
+				ReverseIterator() = default;
 
-            Value &operator*() {
-                return *ptr_;
-            }
+				ReverseIterator(ValueType *ptr): ptr_(ptr) {}
 
-            Value *operator->() {
-                return ptr_;
-            }
-		};
+			public:
+				ReferenceType dereference() const { return *ptr_; }
 
-		template<class Value>
-		struct ReverseIterator {
-		public:
-			using ValueType     = std::remove_reference_t<Value>;
-			using ReferenceType = ValueType &;
-			using PointerType   = ValueType *;
+			public:
+				void increment(ssize_t step = 1) { ptr_ -= step; }
 
-		private:
-			ValueType *ptr_;
+				void decrement(ssize_t step = 1) { ptr_ += step; }
 
-		public:
-			ReverseIterator &operator++() {
-				ptr_++;
-				return *this;
-			}
+			public:
+				bool equal(const ReverseIterator &other) { return ptr_ == other.ptr_; }
 
-			ReverseIterator &operator--() {
-				ptr_--;
-				return *this;
-			}
-
-			ReverseIterator operator++(int) {
-				Iterator res = *this;
-				ptr_++;
-				return res;
-			}
-
-			ReverseIterator operator--(int) {
-				Iterator res = *this;
-				ptr_--;
-				return res;
-			}
-
-			ReverseIterator operator+(size_t idx) const {
-				return {.ptr_ = ptr_ - idx};
-			}
-
-			ReverseIterator operator-(size_t idx) const {
-				return {.ptr_ = ptr_ + idx};
-			}
-
-			void operator+=(size_t idx) {
-				ptr_ -= idx;
-			}
-
-			void operator-=(size_t idx) {
-				ptr_ += idx;
-			}
-
-			size_t operator- (const ReverseIterator &other) const {
-				return ptr_ - other.ptr_;
-			}
-
-			auto operator<=>(const ReverseIterator &other) const {
-				return other.ptr_ <=> ptr_;
-			}
-
-			bool operator==(const ReverseIterator &other) const {
-				return ptr_ == other.ptr_;
-			}
-		};
-
+				auto compare(const ReverseIterator &other) { return other.ptr_ <=> ptr_; }
+			};
+		}
 
 		template<class Value, size_t Len>
 		class Array {
@@ -164,15 +92,10 @@ namespace algorithm::structure {
             using PointerType   = ValueType *;
 
         public:
-			using IteratorType             = Iterator<ValueType>;
-			using ConstIteratorType        = Iterator<const ValueType>;
-			using ReverseIteratorType      = ReverseIterator<ValueType>;
-			using ReverseConstIteratorType = ReverseIterator<const ValueType>;
-
-			static_assert(iterator::RandomIterConcept<IteratorType>);
-			static_assert(iterator::RandomIterConcept<ConstIteratorType>);
-			static_assert(iterator::RandomIterConcept<ReverseIteratorType>);
-			static_assert(iterator::RandomIterConcept<ReverseConstIteratorType>);
+			using IteratorType             = detail::Iterator<ValueType>;
+			using ConstIteratorType        = detail::ReverseIterator<const ValueType>;
+			using ReverseIteratorType      = detail::Iterator<ValueType>;
+			using ReverseConstIteratorType = detail::ReverseIterator<const ValueType>;
 
 		private:
 			ValueType value_array_[Len];
