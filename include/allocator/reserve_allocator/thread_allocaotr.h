@@ -12,7 +12,7 @@
 #include <algorithm>
 #include <bit>
 
-#include <util/func/calculate.h>
+#include <util/calculate.h>
 #include <allocator/base_allocator.h>
 
 namespace algorithm::allocator {

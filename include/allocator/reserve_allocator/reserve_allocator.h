@@ -12,7 +12,7 @@
 #include <utility>
 #include <concepts>
 
-#include <util/func/type.h>
+#include <util/type.h>
 #include <allocator/reserve_allocator/thread_allocaotr.h>
 
 namespace algorithm::allocator {

@@ -9,7 +9,7 @@
 
 #include <cstdint>
 
-#include <util/func/compare.h>
+#include <util/compare.h>
 #include <allocator/allocator.h>
 
 namespace algorithm::structure {

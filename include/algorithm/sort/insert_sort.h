@@ -7,7 +7,7 @@
 #ifndef ALGORITHM_ALGORITHM_SORT_INSERT_SORT_H
 #define ALGORITHM_ALGORITHM_SORT_INSERT_SORT_H
 
-#include <util/func/compare.h>
+#include <util/compare.h>
 
 namespace algorithm {
 

@@ -10,7 +10,7 @@
 
 #include <string>
 
-#include <util/func/static_for.h>
+#include <util/static_for.h>
 
 namespace util {
 

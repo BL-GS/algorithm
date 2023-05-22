@@ -12,7 +12,7 @@
 #include <utility>
 #include <concepts>
 
-#include <util/func/type.h>
+#include <util/type.h>
 #include <allocator/base_allocator.h>
 
 namespace algorithm::allocator {

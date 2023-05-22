@@ -11,7 +11,7 @@
 #include <cstdlib>
 #include <utility>
 
-#include <util/func/type.h>
+#include <util/type.h>
 
 namespace algorithm::allocator {
 

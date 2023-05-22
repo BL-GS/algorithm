@@ -6,9 +6,9 @@
 #ifndef ALGORITHM_UTIL_LOGGER_LOGGER_H
 #define ALGORITHM_UTIL_LOGGER_LOGGER_H
 
-#include <util/logger/abstract_logger.h>
-#include <util/logger/console_logger.h>
-#include <util/logger/file_logger.h>
+#include <logger/abstract_logger.h>
+#include <logger/console_logger.h>
+#include <logger/file_logger.h>
 
 namespace algorithm::util::logger {
 

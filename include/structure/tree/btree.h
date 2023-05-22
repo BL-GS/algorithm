@@ -11,7 +11,7 @@
 #include <algorithm>
 #include <utility>
 
-#include <util/func/compare.h>
+#include <util/compare.h>
 #include <allocator/allocator.h>
 
 namespace algorithm::structure {
