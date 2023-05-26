@@ -27,6 +27,48 @@ namespace algorithm::util::logger {
 	inline GlobalLoggerType &get_global_logger() {
 		return GlobalLoggerType::get_instance();
 	}
+
+	template<class ...Args>
+	inline void logger_info(Args &&...args) {
+		auto &logger = get_global_logger();
+		logger.info(std::forward<Args>(args)...);
+	}
+
+	template<class ...Args>
+	inline void logger_warn(Args &&...args) {
+		auto &logger = get_global_logger();
+		logger.warn(std::forward<Args>(args)...);
+	}
+
+	template<class ...Args>
+	inline void logger_error(Args &&...args) {
+		auto &logger = get_global_logger();
+		logger.error(std::forward<Args>(args)...);
+	}
+
+	template<class ...Args>
+	inline void logger_info_format(const char *fmt, Args &&...args) {
+		auto &logger = get_global_logger();
+		logger.info_format(fmt, std::forward<Args>(args)...);
+	}
+
+	template<class ...Args>
+	inline void logger_warn_format(const char *fmt, Args &&...args) {
+		auto &logger = get_global_logger();
+		logger.warn_format(fmt, std::forward<Args>(args)...);
+	}
+
+	template<class ...Args>
+	inline void logger_error_format(const char *fmt, Args &&...args) {
+		auto &logger = get_global_logger();
+		logger.error_format(fmt, std::forward<Args>(args)...);
+	}
+
+	template<class ...Args>
+	inline void logger_print_property(std::string_view header_name, Args &&...args) {
+		auto &logger = get_global_logger();
+		logger.print_property(header_name, std::forward<Args>(args)...);
+	}
 }
 
 #endif
