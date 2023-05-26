@@ -4,12 +4,12 @@
  */
 
 #pragma once
-#ifndef UTIL_CLASS_H
-#define UTIL_CLASS_H
+#ifndef REFLECTION_CLASS_H
+#define REFLECTION_CLASS_H
 
 #include <string>
 
-namespace util {
+namespace algorithm::reflect {
 
 	//! Get the total name at compilation time.
 	//! \tparam T The type to be print
@@ -59,4 +59,4 @@ namespace util {
 	}
 }
 
-#endif //PTM_CLASS_H
+#endif //REFLECTION_CLASS_H
