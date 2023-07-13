@@ -100,4 +100,4 @@ namespace algorithm::iterator {
 
 }
 
-#endif//UTIL_ALGORITHM_ITEARTOR_TYPE_H
+#endif//ALGORITHM_ITERATOR_ITEARTOR_TYPE_H

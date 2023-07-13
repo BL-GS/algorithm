@@ -147,6 +147,12 @@ namespace algorithm::util::logger {
 		}
 
 		template<class... Arg>
+		void print_lot(char *content, Arg &&...args) {
+			std::cout << content;
+			print_lot(args...);
+		}
+
+		template<class... Arg>
 		void print_lot_format(const char *format, Arg &&...args) {
 			std::printf(format, std::forward<Arg>(args)...);
 		}

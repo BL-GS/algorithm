@@ -11,18 +11,18 @@ namespace algorithm::listener {
 
 	class AbstractListener {
 	public:
-		virtual ~AbstractListener();
+		virtual ~AbstractListener() = default;
 
 	public:
 		/*!
 		 * @brief Start recording
 		 */
-		virtual void start_record();
+		virtual void start_record() = 0;
 
 		/*!
 		 * @brief End recording
 		 */
-		virtual void end_record();
+		virtual void end_record() = 0;
 	};
 
 }

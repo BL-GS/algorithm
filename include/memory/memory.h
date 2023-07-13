@@ -8,8 +8,8 @@
 #define ALGORITHM_MEMORY_H
 
 #include <memory/cache.h>
-
 #include <memory/numa.h>
+#include <memory/nvm.h>
 
 #include <memory/thread_config.h>
 #include <memory/thread.h>
